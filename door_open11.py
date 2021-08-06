@@ -9,6 +9,8 @@
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
+from voice_common_pkg.srv import TTS
+from voice_common_pkg.srv import SpeechToText
 
 class SubscriberClass():
     def __init__(self):
@@ -27,6 +29,7 @@ class SubscriberClass():
 class PublisherClass():
 
     def __init__(self):
+
         self.pub_message = rospy.Publisher('cmd_vel_mux/input/teleope', Twist,queue_size = 1)
 
     def lineContorol(self, value):
@@ -36,14 +39,23 @@ class PublisherClass():
         self.pub_message.publish(twist_cmd)
 
 def main():
+    rospy.wait_for_service('/tts')
+    #rospy.wait_for_service('/stt_server')
+    print "server is ready"
+    #stt = rospy.ServiceProxy('/stt_server',SpeechToText)
+    tts = rospy.ServiceProxy('/tts',TTS)
+    #recognition = self.stt(short_str = True,context_phrases = ['yes','no','again'],
+            #boost_value = 15.0)
     safety_distance = 2.0
-    rospy.loginfo('start "open door"')
+    rospy.loginfo('start "door open "')
+    tts('Start door open')
     sub = SubscriberClass()
     pub = PublisherClass()
     while not rospy.is_shutdown():
         state = sub.message_value()
         if state >= safety_distance:
             rospy.loginfo('start forward')
+
             pub.lineContorol(0.2)
         else:
             pass
